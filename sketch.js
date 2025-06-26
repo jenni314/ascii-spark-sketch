@@ -267,9 +267,16 @@ function repositionStaticElements() {
       label.w = newW;
       label.h = newH;
 
-      let x = constrain(labelPositions[i].x(), newW / 2 + margin, width - newW / 2 - margin);
-      let y = constrain(labelPositions[i].y(), newH / 2 + margin, height - newH / 2 - margin);
+      let x;
+      if (i === 0) {
+        // Responsive left margin for "Empathy"
+        let leftMargin = width >= 1200 ? 80 : width >= 810 ? 36 : 16;
+        x = constrain(leftMargin + newW / 2, newW / 2, width - newW / 2 - margin);
+      } else {
+        x = constrain(labelPositions[i].x(), newW / 2 + margin, width - newW / 2 - margin);
+      }
 
+      let y = constrain(labelPositions[i].y(), newH / 2 + margin, height - newH / 2 - margin);
       Body.setPosition(label.body, { x, y });
     }
   }
