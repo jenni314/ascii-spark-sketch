@@ -20,13 +20,11 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   textFont('Inter');
   textAlign(CENTER, CENTER);
-    pixelDensity(1);
-
+  pixelDensity(1);
 
   engine = Engine.create();
   engine.world.gravity.y = 0;
   world = engine.world;
-    
 
   let thickness = 100;
   bottomWall = Bodies.rectangle(width / 2, height + thickness / 2, width, thickness, { isStatic: true });
@@ -35,7 +33,7 @@ function setup() {
   rightWall = Bodies.rectangle(width + thickness / 2, height / 2, thickness, height, { isStatic: true });
   World.add(world, [bottomWall, topWall, leftWall, rightWall]);
 
-  addStaticLabel(width * 0.15, height * 0.1, "Empathy");
+  addStaticLabel(width * 0.10, height * 0.05, "Empathy");
   addStaticLabel(width * 0.75, height * 0.3, "Experience");
   addStaticLabel(width * 0.4, height * 0.7, "Culture");
 
