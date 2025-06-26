@@ -51,7 +51,7 @@ function setup() {
   let paraText = "I'm a product designer who builds engaging branding and digital experiences — designed through empathy, shaped by culture, and brought to life through design thinking.";
   let paraW = width < 810 ? width : min(width * 0.35, 400);
   let paraH = 120;
-  let paraX = width / 2;
+  let paraX = width < 810 ? width / 2 : width - paraW / 2 - 40;
   let paraY = height - paraH / 2 - 40;
   paragraphBody = Bodies.rectangle(paraX, paraY, paraW, paraH, {
     isStatic: true,
@@ -60,7 +60,7 @@ function setup() {
   paragraphBody.labelText = paraText;
   paragraphBody.labelWidth = paraW;
   paragraphBody.labelHeight = paraH;
-  paragraphBody.labelAlign = 'LEFT';
+  paragraphBody.labelAlign = width < 810 ? 'CENTER' : 'LEFT';
   World.add(world, paragraphBody);
 }
 
@@ -116,7 +116,7 @@ function draw() {
     let cx = c.body.position.x - c.w / 2;
     let cy = c.body.position.y;
     let cxr = c.body.position.x + c.w / 2;
-    let dx = d.position.x - d.labelWidth / 1.9;
+    let dx = d.position.x - d.labelWidth / (d.labelAlign === 'CENTER' ? 2 : 1.9);
     let dy = d.position.y;
 
     bezier(ax, ay, ax + 40, ay - 10, bx - 200, by - 10, bx, by);
@@ -132,7 +132,7 @@ function draw() {
   fill('#161616');
   textFont('Inter');
   textSize(16);
-  textAlign(LEFT, TOP);
+  textAlign(paragraphBody.labelAlign === 'CENTER' ? CENTER : LEFT, TOP);
   text(paragraphBody.labelText, 0, 0, paragraphBody.labelWidth);
   pop();
 }
@@ -276,11 +276,12 @@ function repositionStaticElements() {
 
   let paraW = width < 810 ? width : min(width * 0.35, 400);
   let paraH = 120;
-  let paraX = width / 2;
+  let paraX = width < 810 ? width / 2 : width - paraW / 2 - 40;
   let paraY = constrain(height - paraH / 2 - 40, paraH / 2, height - paraH / 2);
   Body.setPosition(paragraphBody, { x: paraX, y: paraY });
   paragraphBody.labelWidth = paraW;
   paragraphBody.labelHeight = paraH;
+  paragraphBody.labelAlign = width < 810 ? 'CENTER' : 'LEFT';
 }
 
 function repositionWalls() {
