@@ -20,7 +20,6 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   textFont('Inter');
   textAlign(CENTER, CENTER);
-  pixelDensity(1);
 
   engine = Engine.create();
   engine.world.gravity.y = 0;
@@ -35,10 +34,10 @@ function setup() {
 
   addStaticLabel(width * 0.10, height * 0.05, "Empathy");
   addStaticLabel(width * 0.75, height * 0.3, "Experience");
-  addStaticLabel(width * 0.4, height * 0.7, "Culture");
+  addStaticLabel(width * 0.4, height * 0.65, "Culture");
 
   let paraText = "I'm a product designer who builds engaging branding and digital experiences — designed through empathy, shaped by culture, and brought to life through design thinking.";
-  let paraW = min(width * 0.35, 400);
+  let paraW = width < 810 ? width - 60 : min(width * 0.35, 400);
   let paraH = 120;
   let paraX = width - paraW / 2 - 40;
   let paraY = height - paraH / 2 - 40;
@@ -106,7 +105,7 @@ function draw() {
     let dy = d.position.y;
 
    // Empathy → Experience
-bezier(ax, ay, ax + 100, ay - 0, bx - 200, by - 10, bx, by);
+bezier(ax, ay, ax + 120, ay + 100, bx + 10, by - 0, bx, by);
 
 // Experience → Culture
 bezier(bxr, by, bxr + 100, by + 100, cx - 400, cy - 30, cx, cy);
@@ -269,7 +268,7 @@ function repositionStaticElements() {
   // Update paragraph
   World.remove(world, paragraphBody);
   let paraText = "I'm a product designer who builds engaging branding and digital experiences — designed through empathy, shaped by culture, and brought to life through design thinking.";
-  let paraW = min(width * 0.35, 400);
+  let paraW = width < 810 ? width - 60 : min(width * 0.35, 400);
   let paraH = 120;
   let paraX = width - paraW / 2 - 40;
   let paraY = height - paraH / 2 - 40;
