@@ -49,9 +49,9 @@ function setup() {
   World.add(world, [bottomWall, topWall, leftWall, rightWall]);
 
   let paraText = "I'm a product designer who builds engaging branding and digital experiences — designed through empathy, shaped by culture, and brought to life through design thinking.";
-  let paraW = width < 810 ? width - 60 : min(width * 0.35, 400);
+  let paraW = width < 810 ? width : min(width * 0.35, 400);
   let paraH = 120;
-  let paraX = width - paraW / 2 - 40;
+  let paraX = width / 2;
   let paraY = height - paraH / 2 - 40;
   paragraphBody = Bodies.rectangle(paraX, paraY, paraW, paraH, {
     isStatic: true,
@@ -257,6 +257,7 @@ class StaticLabel {
 }
 
 function repositionStaticElements() {
+  let margin = 20;
   if (labels.length === 3) {
     for (let i = 0; i < labels.length; i++) {
       let label = labels[i];
@@ -266,16 +267,16 @@ function repositionStaticElements() {
       label.w = newW;
       label.h = newH;
 
-      let x = constrain(labelPositions[i].x(), newW / 2, width - newW / 2);
-      let y = constrain(labelPositions[i].y(), newH / 2, height - newH / 2);
+      let x = constrain(labelPositions[i].x(), newW / 2 + margin, width - newW / 2 - margin);
+      let y = constrain(labelPositions[i].y(), newH / 2 + margin, height - newH / 2 - margin);
 
       Body.setPosition(label.body, { x, y });
     }
   }
 
-  let paraW = width < 810 ? width - 60 : min(width * 0.35, 400);
+  let paraW = width < 810 ? width : min(width * 0.35, 400);
   let paraH = 120;
-  let paraX = constrain(width - paraW / 2 - 40, paraW / 2, width - paraW / 2);
+  let paraX = width / 2;
   let paraY = constrain(height - paraH / 2 - 40, paraH / 2, height - paraH / 2);
   Body.setPosition(paragraphBody, { x: paraX, y: paraY });
   paragraphBody.labelWidth = paraW;
