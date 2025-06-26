@@ -20,10 +20,13 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   textFont('Inter');
   textAlign(CENTER, CENTER);
+    pixelDensity(1);
+
 
   engine = Engine.create();
   engine.world.gravity.y = 0;
   world = engine.world;
+    
 
   let thickness = 100;
   bottomWall = Bodies.rectangle(width / 2, height + thickness / 2, width, thickness, { isStatic: true });
