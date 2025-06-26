@@ -11,13 +11,16 @@ let labels = [];
 let staticBodies = [];
 let paragraphBody;
 
+const labelWords = ["Empathy", "Experience", "Culture"];
+let labelPositions = [];
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   window.addEventListener('resize', () => {
     resizeCanvas(windowWidth, windowHeight);
     repositionStaticElements();
+    repositionWalls();
   });
-  createCanvas(windowWidth, windowHeight);
   textFont('Inter');
   textAlign(CENTER, CENTER);
 
@@ -25,6 +28,17 @@ function setup() {
   engine.world.gravity.y = 0;
   world = engine.world;
 
+  labelPositions = [
+  { x: width * 0.15, y: height * 0.05 },
+  { x: width * 0.75, y: height * 0.3 },
+  { x: width * 0.5, y: height * 0.65 }
+];
+
+for (let i = 0; i < labelWords.length; i++) {
+  addStaticLabel(labelPositions[i].x, labelPositions[i].y, labelWords[i]);
+}
+
+  
   let thickness = 100;
   bottomWall = Bodies.rectangle(width / 2, height + thickness / 2, width, thickness, { isStatic: true });
   topWall = Bodies.rectangle(width / 2, -thickness / 2, width, thickness, { isStatic: true });
@@ -32,9 +46,9 @@ function setup() {
   rightWall = Bodies.rectangle(width + thickness / 2, height / 2, thickness, height, { isStatic: true });
   World.add(world, [bottomWall, topWall, leftWall, rightWall]);
 
-  addStaticLabel(width * 0.10, height * 0.05, "Empathy");
+  addStaticLabel(width * 0.15, height * 0.05, "Empathy");
   addStaticLabel(width * 0.75, height * 0.3, "Experience");
-  addStaticLabel(width * 0.4, height * 0.65, "Culture");
+  addStaticLabel(width * 0.5, height * 0.65, "Culture");
 
   let paraText = "I'm a product designer who builds engaging branding and digital experiences — designed through empathy, shaped by culture, and brought to life through design thinking.";
   let paraW = width < 810 ? width - 60 : min(width * 0.35, 400);
@@ -105,14 +119,13 @@ function draw() {
     let dy = d.position.y;
 
    // Empathy → Experience
-bezier(ax, ay, ax + 120, ay + 100, bx + 10, by - 0, bx, by);
+bezier(ax, ay, ax + 40, ay - 10, bx - 200, by - 10, bx, by);
 
 // Experience → Culture
 bezier(bxr, by, bxr + 100, by + 100, cx - 400, cy - 30, cx, cy);
 
 // Culture → Paragraph
 bezier(cxr, cy, cxr + 500, cy - 10, dx - 400, dy - 60, dx, dy);
-
   }
 
   drawingContext.setLineDash([]);
@@ -254,31 +267,31 @@ function addStaticLabel(x, y, word) {
 }
 
 function repositionStaticElements() {
-  // Remove old labels and recreate them
-  for (let label of labels) {
-    World.remove(world, label.body);
+  if (labels.length === 3) {
+    for (let i = 0; i < labels.length; i++) {
+      let label = labels[i];
+      let word = words[i];
+      let newW = textWidth(word) + 20;
+      label.w = newW;
+      label.h = 40;
+      Body.setPosition(label.body, positions[i]);
+    }
   }
-  labels = [];
 
-  // Recreate labels at new screen-relative positions
-  addStaticLabel(width * 0.25, height * 0.25, "Empathy");
-  addStaticLabel(width * 0.75, height * 0.3, "Experience");
-  addStaticLabel(width * 0.5, height * 0.75, "Culture");
-
-  // Update paragraph
-  World.remove(world, paragraphBody);
-  let paraText = "I'm a product designer who builds engaging branding and digital experiences — designed through empathy, shaped by culture, and brought to life through design thinking.";
   let paraW = width < 810 ? width - 60 : min(width * 0.35, 400);
   let paraH = 120;
   let paraX = width - paraW / 2 - 40;
   let paraY = height - paraH / 2 - 40;
-  paragraphBody = Bodies.rectangle(paraX, paraY, paraW, paraH, {
-    isStatic: true,
-    restitution: 0.9
-  });
-  paragraphBody.labelText = paraText;
+  Body.setPosition(paragraphBody, { x: paraX, y: paraY });
   paragraphBody.labelWidth = paraW;
-  paragraphBody.labelHeight = paraH;
-  paragraphBody.labelAlign = 'LEFT';
-  World.add(world, paragraphBody);
+  paragraphBody.labelHeight = paraH;  
 }
+
+function repositionWalls() {
+  let thickness = 100;
+  Body.setPosition(bottomWall, { x: width / 2, y: height + thickness / 2 });
+  Body.setPosition(topWall, { x: width / 2, y: -thickness / 2 });
+  Body.setPosition(leftWall, { x: -thickness / 2, y: height / 2 });
+  Body.setPosition(rightWall, { x: width + thickness / 2, y: height / 2 });
+}
+
