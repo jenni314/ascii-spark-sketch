@@ -12,7 +12,12 @@ let staticBodies = [];
 let paragraphBody;
 
 function setup() {
-  createCanvas(window.innerWidth, window.innerHeight);
+  createCanvas(windowWidth, windowHeight);
+  window.addEventListener('resize', () => {
+    resizeCanvas(windowWidth, windowHeight);
+    repositionStaticElements();
+  });
+  createCanvas(windowWidth, windowHeight);
   textFont('Inter');
   textAlign(CENTER, CENTER);
 
@@ -48,6 +53,7 @@ function setup() {
 }
 
 function draw() {
+  
   // transparent background for Framer embedding
   clear();
   Engine.update(engine);
@@ -245,4 +251,34 @@ class StaticLabel {
 function addStaticLabel(x, y, word) {
   let label = new StaticLabel(x, y, word);
   labels.push(label);
+}
+
+function repositionStaticElements() {
+  // Remove old labels and recreate them
+  for (let label of labels) {
+    World.remove(world, label.body);
+  }
+  labels = [];
+
+  // Recreate labels at new screen-relative positions
+  addStaticLabel(width * 0.25, height * 0.25, "Empathy");
+  addStaticLabel(width * 0.75, height * 0.3, "Experience");
+  addStaticLabel(width * 0.5, height * 0.75, "Culture");
+
+  // Update paragraph
+  World.remove(world, paragraphBody);
+  let paraText = "I'm a product designer who builds engaging branding and digital experiences — designed through empathy, shaped by culture, and brought to life through design thinking.";
+  let paraW = min(width * 0.35, 400);
+  let paraH = 120;
+  let paraX = width - paraW / 2 - 40;
+  let paraY = height - paraH / 2 - 40;
+  paragraphBody = Bodies.rectangle(paraX, paraY, paraW, paraH, {
+    isStatic: true,
+    restitution: 0.9
+  });
+  paragraphBody.labelText = paraText;
+  paragraphBody.labelWidth = paraW;
+  paragraphBody.labelHeight = paraH;
+  paragraphBody.labelAlign = 'LEFT';
+  World.add(world, paragraphBody);
 }
