@@ -131,7 +131,7 @@ function draw() {
   noStroke();
   fill('#161616');
   textFont('Inter');
-  textSize(16);
+  textSize(24);
   textAlign(paragraphBody.labelAlign === 'CENTER' ? CENTER : LEFT, TOP);
   text(paragraphBody.labelText, 0, 0, paragraphBody.labelWidth);
   pop();
