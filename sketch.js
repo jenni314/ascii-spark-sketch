@@ -12,7 +12,16 @@ let staticBodies = [];
 let paragraphBody;
 
 const labelWords = ["Empathy", "Experience", "Culture"];
-let labelPositions = [];
+let labelPositions = [
+  { x: () => width * 0.15, y: () => height * 0.05 },
+  { x: () => width * 0.75, y: () => height * 0.3 },
+  { x: () => width * 0.5, y: () => height * 0.65 }
+];
+
+function addStaticLabel(x, y, word) {
+  let label = new StaticLabel(x, y, word);
+  labels.push(label);
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -28,27 +37,16 @@ function setup() {
   engine.world.gravity.y = 0;
   world = engine.world;
 
-  labelPositions = [
-  { x: width * 0.15, y: height * 0.05 },
-  { x: width * 0.75, y: height * 0.3 },
-  { x: width * 0.5, y: height * 0.65 }
-];
+  for (let i = 0; i < labelWords.length; i++) {
+    addStaticLabel(labelPositions[i].x(), labelPositions[i].y(), labelWords[i]);
+  }
 
-for (let i = 0; i < labelWords.length; i++) {
-  addStaticLabel(labelPositions[i].x, labelPositions[i].y, labelWords[i]);
-}
-
-  
   let thickness = 100;
   bottomWall = Bodies.rectangle(width / 2, height + thickness / 2, width, thickness, { isStatic: true });
   topWall = Bodies.rectangle(width / 2, -thickness / 2, width, thickness, { isStatic: true });
   leftWall = Bodies.rectangle(-thickness / 2, height / 2, thickness, height, { isStatic: true });
   rightWall = Bodies.rectangle(width + thickness / 2, height / 2, thickness, height, { isStatic: true });
   World.add(world, [bottomWall, topWall, leftWall, rightWall]);
-
-  addStaticLabel(width * 0.15, height * 0.05, "Empathy");
-  addStaticLabel(width * 0.75, height * 0.3, "Experience");
-  addStaticLabel(width * 0.5, height * 0.65, "Culture");
 
   let paraText = "I'm a product designer who builds engaging branding and digital experiences — designed through empathy, shaped by culture, and brought to life through design thinking.";
   let paraW = width < 810 ? width - 60 : min(width * 0.35, 400);
@@ -67,8 +65,12 @@ for (let i = 0; i < labelWords.length; i++) {
 }
 
 function draw() {
-  
-  // transparent background for Framer embedding
+  if (width !== windowWidth || height !== windowHeight) {
+    resizeCanvas(windowWidth, windowHeight);
+    repositionStaticElements();
+    repositionWalls();
+  }
+
   clear();
   Engine.update(engine);
   detectCollisions();
@@ -93,7 +95,6 @@ function draw() {
     l.display();
   }
 
-  // Bezier curves between static elements
   if (labels.length >= 3 && paragraphBody) {
     let a = labels[0];
     let b = labels[1];
@@ -118,14 +119,9 @@ function draw() {
     let dx = d.position.x - d.labelWidth / 1.9;
     let dy = d.position.y;
 
-   // Empathy → Experience
-bezier(ax, ay, ax + 40, ay - 10, bx - 200, by - 10, bx, by);
-
-// Experience → Culture
-bezier(bxr, by, bxr + 100, by + 100, cx - 400, cy - 30, cx, cy);
-
-// Culture → Paragraph
-bezier(cxr, cy, cxr + 500, cy - 10, dx - 400, dy - 60, dx, dy);
+    bezier(ax, ay, ax + 40, ay - 10, bx - 200, by - 10, bx, by);
+    bezier(bxr, by, bxr + 100, by + 100, cx - 400, cy - 30, cx, cy);
+    bezier(cxr, cy, cxr + 500, cy - 10, dx - 400, dy - 60, dx, dy);
   }
 
   drawingContext.setLineDash([]);
@@ -251,7 +247,6 @@ class StaticLabel {
     push();
     translate(pos.x, pos.y);
     noStroke();
-    noStroke();
     fill('#161616');
     textFont('Inter');
     textSize(32);
@@ -261,30 +256,30 @@ class StaticLabel {
   }
 }
 
-function addStaticLabel(x, y, word) {
-  let label = new StaticLabel(x, y, word);
-  labels.push(label);
-}
-
 function repositionStaticElements() {
   if (labels.length === 3) {
     for (let i = 0; i < labels.length; i++) {
       let label = labels[i];
-      let word = words[i];
+      let word = labelWords[i];
       let newW = textWidth(word) + 20;
+      let newH = 40;
       label.w = newW;
-      label.h = 40;
-      Body.setPosition(label.body, positions[i]);
+      label.h = newH;
+
+      let x = constrain(labelPositions[i].x(), newW / 2, width - newW / 2);
+      let y = constrain(labelPositions[i].y(), newH / 2, height - newH / 2);
+
+      Body.setPosition(label.body, { x, y });
     }
   }
 
   let paraW = width < 810 ? width - 60 : min(width * 0.35, 400);
   let paraH = 120;
-  let paraX = width - paraW / 2 - 40;
-  let paraY = height - paraH / 2 - 40;
+  let paraX = constrain(width - paraW / 2 - 40, paraW / 2, width - paraW / 2);
+  let paraY = constrain(height - paraH / 2 - 40, paraH / 2, height - paraH / 2);
   Body.setPosition(paragraphBody, { x: paraX, y: paraY });
   paragraphBody.labelWidth = paraW;
-  paragraphBody.labelHeight = paraH;  
+  paragraphBody.labelHeight = paraH;
 }
 
 function repositionWalls() {
@@ -294,4 +289,3 @@ function repositionWalls() {
   Body.setPosition(leftWall, { x: -thickness / 2, y: height / 2 });
   Body.setPosition(rightWall, { x: width + thickness / 2, y: height / 2 });
 }
-
