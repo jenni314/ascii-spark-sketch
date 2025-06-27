@@ -30,7 +30,7 @@ function setup() {
     repositionStaticElements();
     repositionWalls();
   });
-  textFont('Inter');
+  textFont('Georgia');
   textAlign(CENTER, CENTER);
 
   engine = Engine.create();
@@ -130,8 +130,8 @@ function draw() {
   translate(pos.x - paragraphBody.labelWidth / 2, pos.y - paragraphBody.labelHeight / 2);
   noStroke();
   fill('#161616');
-  textFont('Inter');
-  textSize(24);
+  textFont('Georgia');
+  textSize(18);
   textAlign(paragraphBody.labelAlign === 'CENTER' ? CENTER : LEFT, TOP);
   text(paragraphBody.labelText, 0, 0, paragraphBody.labelWidth);
   pop();
@@ -162,7 +162,7 @@ function mousePressed() {
 class FloatingLetter {
   constructor(x, y, letter) {
     this.letter = letter;
-    textFont('Inter');
+    textFont('Georgia');
     textSize(24);
     this.w = textWidth(letter) + 16;
     this.h = 32;
@@ -205,7 +205,7 @@ class FloatingLetter {
     translate(pos.x, pos.y);
     rotate(angle);
     fill(this.color);
-    textFont('Inter');
+    textFont('Georgia');
     textSize(24);
     text(this.letter, 0, 0);
     pop();
@@ -231,7 +231,7 @@ class FloatingLetter {
 class StaticLabel {
   constructor(x, y, textContent) {
     this.textContent = textContent;
-    textFont('Inter');
+    textFont('Georgia');
     textSize(32);
     this.w = textWidth(this.textContent) + 20;
     this.h = 40;
@@ -248,7 +248,7 @@ class StaticLabel {
     translate(pos.x, pos.y);
     noStroke();
     fill('#161616');
-    textFont('Inter');
+    textFont('Georgia');
     textSize(32);
     textAlign(CENTER, CENTER);
     text(this.textContent, 0, 0);
