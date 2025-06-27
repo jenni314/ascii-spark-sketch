@@ -30,7 +30,7 @@ function setup() {
     repositionStaticElements();
     repositionWalls();
   });
-  textFont('Georgia');
+  textFont('Helvetica');
   textAlign(CENTER, CENTER);
 
   engine = Engine.create();
@@ -74,6 +74,7 @@ function draw() {
   clear();
   Engine.update(engine);
   detectCollisions();
+  detectStaticLabelCollisions();
 
   if (frameCount % 40 === 0 && letterBodies.length < 50) {
     let x = random(100, width - 100);
@@ -130,7 +131,7 @@ function draw() {
   translate(pos.x - paragraphBody.labelWidth / 2, pos.y - paragraphBody.labelHeight / 2);
   noStroke();
   fill('#161616');
-  textFont('Georgia');
+  textFont('Helvetica');
   textSize(18);
   textAlign(paragraphBody.labelAlign === 'CENTER' ? CENTER : LEFT, TOP);
   text(paragraphBody.labelText, 0, 0, paragraphBody.labelWidth);
@@ -151,6 +152,22 @@ function detectCollisions() {
   }
 }
 
+function detectStaticLabelCollisions() {
+  for (let letter of letterBodies) {
+    let pos = letter.body.position;
+    for (let label of labels) {
+      let lpos = label.body.position;
+      let dx = abs(pos.x - lpos.x);
+      let dy = abs(pos.y - lpos.y);
+      let overlapX = dx < (letter.w / 2 + label.w / 2);
+      let overlapY = dy < (letter.h / 2 + label.h / 2);
+      if (overlapX && overlapY) {
+        letter.clicked();
+      }
+    }
+  }
+}
+
 function mousePressed() {
   for (let l of letterBodies) {
     if (l.isMouseOver()) {
@@ -162,7 +179,7 @@ function mousePressed() {
 class FloatingLetter {
   constructor(x, y, letter) {
     this.letter = letter;
-    textFont('Georgia');
+    textFont('Helvetica');
     textSize(24);
     this.w = textWidth(letter) + 16;
     this.h = 32;
@@ -205,7 +222,7 @@ class FloatingLetter {
     translate(pos.x, pos.y);
     rotate(angle);
     fill(this.color);
-    textFont('Georgia');
+    textFont('Helvetica');
     textSize(24);
     text(this.letter, 0, 0);
     pop();
@@ -231,7 +248,7 @@ class FloatingLetter {
 class StaticLabel {
   constructor(x, y, textContent) {
     this.textContent = textContent;
-    textFont('Georgia');
+    textFont('Helvetica');
     textSize(32);
     this.w = textWidth(this.textContent) + 20;
     this.h = 40;
@@ -248,7 +265,7 @@ class StaticLabel {
     translate(pos.x, pos.y);
     noStroke();
     fill('#161616');
-    textFont('Georgia');
+    textFont('Helvetica');
     textSize(32);
     textAlign(CENTER, CENTER);
     text(this.textContent, 0, 0);
@@ -269,7 +286,6 @@ function repositionStaticElements() {
 
       let x;
       if (i === 0) {
-        // Responsive left margin for "Empathy"
         let leftMargin = width >= 1200 ? 80 : width >= 810 ? 36 : 16;
         x = constrain(leftMargin + newW / 2, newW / 2, width - newW / 2 - margin);
       } else {
