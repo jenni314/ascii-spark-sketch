@@ -272,7 +272,11 @@ class StaticLabel {
 
 function repositionStaticElements() {
   let margin = 20;
+  let minVerticalSpacing = 100; // minimum vertical space between elements
+
   if (labels.length === 3) {
+    let usedZones = [];
+
     for (let i = 0; i < labels.length; i++) {
       let label = labels[i];
       let word = labelWords[i];
@@ -281,16 +285,18 @@ function repositionStaticElements() {
       label.w = newW;
       label.h = newH;
 
-      let x;
-      if (i === 0) {
-        let leftMargin = width >= 1200 ? 80 : width >= 810 ? 36 : 16;
-        x = constrain(leftMargin + newW / 2, newW / 2, width - newW / 2 - margin);
-      } else {
-        x = constrain(labelPositions[i].x(), newW / 2 + margin, width - newW / 2 - margin);
+      let x = constrain(labelPositions[i].x(), newW / 2 + margin, width - newW / 2 - margin);
+      let y = constrain(labelPositions[i].y(), newH / 2 + margin, height - newH / 2 - margin);
+
+      // Push down if overlapping a previous label
+      for (let zone of usedZones) {
+        if (abs(y - zone.y) < minVerticalSpacing) {
+          y = zone.y + minVerticalSpacing;
+        }
       }
 
-      let y = constrain(labelPositions[i].y(), newH / 2 + margin, height - newH / 2 - margin);
       Body.setPosition(label.body, { x, y });
+      usedZones.push({ y, h: newH });
     }
   }
 
@@ -298,11 +304,22 @@ function repositionStaticElements() {
   let paraH = 120;
   let paraX = width < 810 ? width / 2 : width - paraW / 2 - 40;
   let paraY = constrain(height - paraH / 2 - 40, paraH / 2, height - paraH / 2);
+
+  // Push up the paragraph if it's overlapping with the last label
+  let lastLabel = labels[2];
+  if (lastLabel) {
+    let lastY = lastLabel.body.position.y;
+    if (paraY - paraH / 2 < lastY + 40) {
+      paraY = lastY + 40 + paraH / 2 + 20;
+    }
+  }
+
   Body.setPosition(paragraphBody, { x: paraX, y: paraY });
   paragraphBody.labelWidth = paraW;
   paragraphBody.labelHeight = paraH;
   paragraphBody.labelAlign = width < 810 ? 'CENTER' : 'LEFT';
 }
+
 
 function repositionWalls() {
   let thickness = 100;
