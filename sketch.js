@@ -24,6 +24,7 @@ function addStaticLabel(x, y, word) {
 }
 
 function setup() {
+  let minHeight = 300; // move this to the top of setup()
   createCanvas(windowWidth, windowHeight);
   window.addEventListener('resize', () => {
     resizeCanvas(windowWidth, windowHeight);
