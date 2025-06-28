@@ -13,9 +13,9 @@ let paragraphBody;
 
 const labelWords = ["Empathy", "Experience", "Culture"];
 let labelPositions = [
-  { x: () => width * 0.15, y: () => height * 0.05 },
+  { x: () => width * 0.15, y: () => height * 0.15 },
   { x: () => width * 0.75, y: () => height * 0.3 },
-  { x: () => width * 0.5, y: () => height * 0.65 }
+  { x: () => width * 0.3, y: () => height * 0.55 }
 ];
 
 function addStaticLabel(x, y, word) {
@@ -30,7 +30,6 @@ function setup() {
     repositionStaticElements();
     repositionWalls();
   });
-  textFont('Helvetica');
   textAlign(CENTER, CENTER);
 
   engine = Engine.create();
@@ -64,6 +63,8 @@ function setup() {
   World.add(world, paragraphBody);
 }
 
+
+
 function draw() {
   if (width !== windowWidth || height !== windowHeight) {
     resizeCanvas(windowWidth, windowHeight);
@@ -76,7 +77,7 @@ function draw() {
   detectCollisions();
   detectStaticLabelCollisions();
 
-  if (frameCount % 40 === 0 && letterBodies.length < 50) {
+  if (frameCount % 20 === 0 && letterBodies.length < 80) {
     let x = random(100, width - 100);
     let y = random(100, height - 100);
     let spark = random(['*', '+', 'x', '•', '.', '✦']);
@@ -95,6 +96,7 @@ function draw() {
     }
     l.display();
   }
+
 
   if (labels.length >= 3 && paragraphBody) {
     let a = labels[0];
@@ -121,8 +123,8 @@ function draw() {
     let dy = d.position.y;
 
     bezier(ax, ay, ax + 40, ay - 10, bx - 200, by - 10, bx, by);
-    bezier(bxr, by, bxr + 100, by + 100, cx - 400, cy - 30, cx, cy);
-    bezier(cxr, cy, cxr + 500, cy - 10, dx - 400, dy - 60, dx, dy);
+    bezier(bxr, by, bxr + 200, by + 100, cx - 200, cy - 100, cx, cy);
+    bezier(cxr, cy, cxr + 400, cy - 10, dx - 400, dy - 60, dx, dy);
   }
 
   drawingContext.setLineDash([]);
@@ -131,7 +133,6 @@ function draw() {
   translate(pos.x - paragraphBody.labelWidth / 2, pos.y - paragraphBody.labelHeight / 2);
   noStroke();
   fill('#161616');
-  textFont('Helvetica');
   textSize(18);
   textAlign(paragraphBody.labelAlign === 'CENTER' ? CENTER : LEFT, TOP);
   text(paragraphBody.labelText, 0, 0, paragraphBody.labelWidth);
@@ -179,7 +180,6 @@ function mousePressed() {
 class FloatingLetter {
   constructor(x, y, letter) {
     this.letter = letter;
-    textFont('Helvetica');
     textSize(24);
     this.w = textWidth(letter) + 16;
     this.h = 32;
@@ -222,7 +222,6 @@ class FloatingLetter {
     translate(pos.x, pos.y);
     rotate(angle);
     fill(this.color);
-    textFont('Helvetica');
     textSize(24);
     text(this.letter, 0, 0);
     pop();
@@ -248,7 +247,6 @@ class FloatingLetter {
 class StaticLabel {
   constructor(x, y, textContent) {
     this.textContent = textContent;
-    textFont('Helvetica');
     textSize(32);
     this.w = textWidth(this.textContent) + 20;
     this.h = 40;
@@ -265,8 +263,7 @@ class StaticLabel {
     translate(pos.x, pos.y);
     noStroke();
     fill('#161616');
-    textFont('Helvetica');
-    textSize(32);
+    textSize(28);
     textAlign(CENTER, CENTER);
     text(this.textContent, 0, 0);
     pop();
