@@ -9,4 +9,6 @@ canvas {
 
 body {
   font-family: 'Inter', 'Helvetica', sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.4px;
 }
