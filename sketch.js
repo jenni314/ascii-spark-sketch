@@ -25,12 +25,12 @@ function addStaticLabel(x, y, word) {
 
 function setup() {
   let minHeight = 300; // move this to the top of setup()
-  createCanvas(windowWidth, windowHeight);
-  window.addEventListener('resize', () => {
-    resizeCanvas(windowWidth, windowHeight);
-    repositionStaticElements();
-    repositionWalls();
-  });
+createCanvas(windowWidth, max(windowHeight, minHeight));
+ window.addEventListener('resize', () => {
+  resizeCanvas(windowWidth, max(windowHeight, minHeight));
+  repositionStaticElements();
+  repositionWalls();
+});
   textAlign(CENTER, CENTER);
 
   engine = Engine.create();
