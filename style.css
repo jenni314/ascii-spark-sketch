@@ -1,12 +1,12 @@
 html, body {
   margin: 0;
   padding: 0;
-  overflow: hidden; 
+  overflow: hidden; /* 👈 prevents scrollbars */
 }
 canvas {
   display: block;
 }
 
 body {
-  font-family: 'Georgia', 'Times New Roman', serif;
+  font-family: 'Inter', 'Helvetica', sans-serif;
 }
