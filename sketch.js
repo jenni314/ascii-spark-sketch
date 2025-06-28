@@ -13,7 +13,7 @@ let paragraphBody;
 
 const labelWords = ["Empathy", "Experience", "Culture"];
 let labelPositions = [
-  { x: () => width * 0.15, y: () => height * 0.15 },
+  { x: () => width * 0.2, y: () => height * 0.10 },
   { x: () => width * 0.75, y: () => height * 0.3 },
   { x: () => width * 0.3, y: () => height * 0.55 }
 ];
@@ -122,7 +122,7 @@ function draw() {
     let dx = d.position.x - d.labelWidth / (d.labelAlign === 'CENTER' ? 2 : 1.9);
     let dy = d.position.y;
 
-    bezier(ax, ay, ax + 40, ay - 10, bx - 200, by - 10, bx, by);
+    bezier(ax, ay, ax + 40, ay + 40, bx - 200, by - 10, bx, by);
     bezier(bxr, by, bxr + 200, by + 100, cx - 200, cy - 100, cx, cy);
     bezier(cxr, cy, cxr + 400, cy - 10, dx - 400, dy - 60, dx, dy);
   }
