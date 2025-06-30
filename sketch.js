@@ -9,7 +9,6 @@ let letterBodies = [];
 let leftWall, rightWall, topWall, bottomWall;
 let labels = [];
 let staticBodies = [];
-let paragraphBody;
 
 const labelWords = ["Empathy", "Experience", "Culture"];
 let labelPositions = [
@@ -24,13 +23,16 @@ function addStaticLabel(x, y, word) {
 }
 
 function setup() {
-  let minHeight = 300; // move this to the top of setup()
-createCanvas(windowWidth, max(windowHeight, minHeight));
- window.addEventListener('resize', () => {
-  resizeCanvas(windowWidth, max(windowHeight, minHeight));
-  repositionStaticElements();
-  repositionWalls();
-});
+  let minHeight = 300;
+  createCanvas(windowWidth, max(windowHeight, minHeight));
+
+  window.addEventListener('resize', () => {
+    resizeCanvas(windowWidth, max(windowHeight, minHeight));
+    repositionStaticElements();
+    repositionWalls();
+  });
+
+  textFont('serif'); // Use serif font globally
   textAlign(CENTER, CENTER);
 
   engine = Engine.create();
@@ -47,24 +49,7 @@ createCanvas(windowWidth, max(windowHeight, minHeight));
   leftWall = Bodies.rectangle(-thickness / 2, height / 2, thickness, height, { isStatic: true });
   rightWall = Bodies.rectangle(width + thickness / 2, height / 2, thickness, height, { isStatic: true });
   World.add(world, [bottomWall, topWall, leftWall, rightWall]);
-
-  let paraText = "I'm a product designer who builds engaging branding and digital experiences — designed through empathy, shaped by culture, and brought to life through design thinking.";
-  let paraW = width < 810 ? width : min(width * 0.35, 400);
-  let paraH = 120;
-  let paraX = width < 810 ? width / 2 : width - paraW / 2 - 40;
-  let paraY = height - paraH / 2 - 40;
-  paragraphBody = Bodies.rectangle(paraX, paraY, paraW, paraH, {
-    isStatic: true,
-    restitution: 0.9
-  });
-  paragraphBody.labelText = paraText;
-  paragraphBody.labelWidth = paraW;
-  paragraphBody.labelHeight = paraH;
-  paragraphBody.labelAlign = width < 810 ? 'CENTER' : 'LEFT';
-  World.add(world, paragraphBody);
 }
-
-
 
 function draw() {
   if (width !== windowWidth || height !== windowHeight) {
@@ -98,12 +83,10 @@ function draw() {
     l.display();
   }
 
-
-  if (labels.length >= 3 && paragraphBody) {
+  if (labels.length >= 3) {
     let a = labels[0];
     let b = labels[1];
     let c = labels[2];
-    let d = paragraphBody;
 
     stroke(180);
     let offset = (millis() / 120) % 32;
@@ -119,25 +102,12 @@ function draw() {
     let bxr = b.body.position.x + b.w / 2;
     let cx = c.body.position.x - c.w / 2;
     let cy = c.body.position.y;
-    let cxr = c.body.position.x + c.w / 2;
-    let dx = d.position.x - d.labelWidth / (d.labelAlign === 'CENTER' ? 2 : 1.9);
-    let dy = d.position.y;
 
     bezier(ax, ay, ax + 40, ay + 40, bx - 200, by - 10, bx, by);
     bezier(bxr, by, bxr + 200, by + 100, cx - 200, cy - 100, cx, cy);
-    bezier(cxr, cy, cxr + 400, cy - 10, dx - 400, dy - 60, dx, dy);
   }
 
   drawingContext.setLineDash([]);
-  let pos = paragraphBody.position;
-  push();
-  translate(pos.x - paragraphBody.labelWidth / 2, pos.y - paragraphBody.labelHeight / 2);
-  noStroke();
-  fill('#161616');
-  textSize(18);
-  textAlign(paragraphBody.labelAlign === 'CENTER' ? CENTER : LEFT, TOP);
-  text(paragraphBody.labelText, 0, 0, paragraphBody.labelWidth);
-  pop();
 }
 
 function detectCollisions() {
@@ -185,8 +155,8 @@ class FloatingLetter {
     this.w = textWidth(letter) + 16;
     this.h = 32;
     this.body = Bodies.rectangle(x, y, this.w, this.h, {
-      restitution: 0.9,
-      friction: 0.1,
+      restitution: 0.6,
+      friction: 0.02,
       frictionAir: 0.02,
       density: 0.001
     });
@@ -223,6 +193,7 @@ class FloatingLetter {
     translate(pos.x, pos.y);
     rotate(angle);
     fill(this.color);
+    textFont('serif'); // Use serif font here
     textSize(24);
     text(this.letter, 0, 0);
     pop();
@@ -263,8 +234,9 @@ class StaticLabel {
     push();
     translate(pos.x, pos.y);
     noStroke();
-    fill('#161616');
-    textSize(28);
+    fill('#2E2E2E');
+    textFont('serif'); // Use serif font here
+    textSize(24);
     textAlign(CENTER, CENTER);
     text(this.textContent, 0, 0);
     pop();
@@ -273,7 +245,7 @@ class StaticLabel {
 
 function repositionStaticElements() {
   let margin = 20;
-  let minVerticalSpacing = 100; // minimum vertical space between elements
+  let minVerticalSpacing = 100;
 
   if (labels.length === 3) {
     let usedZones = [];
@@ -289,7 +261,6 @@ function repositionStaticElements() {
       let x = constrain(labelPositions[i].x(), newW / 2 + margin, width - newW / 2 - margin);
       let y = constrain(labelPositions[i].y(), newH / 2 + margin, height - newH / 2 - margin);
 
-      // Push down if overlapping a previous label
       for (let zone of usedZones) {
         if (abs(y - zone.y) < minVerticalSpacing) {
           y = zone.y + minVerticalSpacing;
@@ -300,27 +271,7 @@ function repositionStaticElements() {
       usedZones.push({ y, h: newH });
     }
   }
-
-  let paraW = width < 810 ? width : min(width * 0.35, 400);
-  let paraH = 120;
-  let paraX = width < 810 ? width / 2 : width - paraW / 2 - 40;
-  let paraY = constrain(height - paraH / 2 - 40, paraH / 2, height - paraH / 2);
-
-  // Push up the paragraph if it's overlapping with the last label
-  let lastLabel = labels[2];
-  if (lastLabel) {
-    let lastY = lastLabel.body.position.y;
-    if (paraY - paraH / 2 < lastY + 40) {
-      paraY = lastY + 40 + paraH / 2 + 20;
-    }
-  }
-
-  Body.setPosition(paragraphBody, { x: paraX, y: paraY });
-  paragraphBody.labelWidth = paraW;
-  paragraphBody.labelHeight = paraH;
-  paragraphBody.labelAlign = width < 810 ? 'CENTER' : 'LEFT';
 }
-
 
 function repositionWalls() {
   let thickness = 100;
