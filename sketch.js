@@ -8,13 +8,12 @@ let engine, world;
 let letterBodies = [];
 let leftWall, rightWall, topWall, bottomWall;
 let labels = [];
-let staticBodies = [];
 
 const labelWords = ["Empathy", "Experience", "Culture"];
 let labelPositions = [
-  { x: () => width * 0.2, y: () => height * 0.10 },
-  { x: () => width * 0.75, y: () => height * 0.3 },
-  { x: () => width * 0.3, y: () => height * 0.55 }
+  { x: () => width * 0.60 },
+  { x: () => width * 0.80 },
+  { x: () => width * 0.75 }
 ];
 
 function addStaticLabel(x, y, word) {
@@ -32,15 +31,13 @@ function setup() {
     repositionWalls();
   });
 
-  textFont('serif'); // Use serif font globally
   textAlign(CENTER, CENTER);
-
   engine = Engine.create();
   engine.world.gravity.y = 0;
   world = engine.world;
 
   for (let i = 0; i < labelWords.length; i++) {
-    addStaticLabel(labelPositions[i].x(), labelPositions[i].y(), labelWords[i]);
+    addStaticLabel(labelPositions[i].x(), 0, labelWords[i]); // y will be updated later
   }
 
   let thickness = 100;
@@ -49,6 +46,8 @@ function setup() {
   leftWall = Bodies.rectangle(-thickness / 2, height / 2, thickness, height, { isStatic: true });
   rightWall = Bodies.rectangle(width + thickness / 2, height / 2, thickness, height, { isStatic: true });
   World.add(world, [bottomWall, topWall, leftWall, rightWall]);
+
+  repositionStaticElements();
 }
 
 function draw() {
@@ -83,29 +82,36 @@ function draw() {
     l.display();
   }
 
-  if (labels.length >= 3) {
-    let a = labels[0];
-    let b = labels[1];
-    let c = labels[2];
+  // Bezier curves between labels
+ if (labels.length >= 3) {
+  let a = labels[0];
+  let b = labels[1];
+  let c = labels[2];
 
-    stroke(180);
-    let offset = (millis() / 120) % 32;
-    drawingContext.setLineDash([5, 20]);
-    drawingContext.lineDashOffset = -offset;
-    strokeWeight(2);
-    noFill();
+  stroke(180);
+  let offset = (millis() / 120) % 32;
+  drawingContext.setLineDash([5, 20]);
+  drawingContext.lineDashOffset = -offset;
+  strokeWeight(2);
+  noFill();
 
-    let ax = a.body.position.x + a.w / 2;
-    let ay = a.body.position.y;
-    let bx = b.body.position.x - b.w / 2;
-    let by = b.body.position.y;
-    let bxr = b.body.position.x + b.w / 2;
-    let cx = c.body.position.x - c.w / 2;
-    let cy = c.body.position.y;
+  // Curve from right side of A to left side of B
+  let ax = a.body.position.x + a.w / 2;
+  let ay = a.body.position.y;
 
-    bezier(ax, ay, ax + 40, ay + 40, bx - 200, by - 10, bx, by);
-    bezier(bxr, by, bxr + 200, by + 100, cx - 200, cy - 100, cx, cy);
-  }
+  let bx = b.body.position.x - b.w / 2;
+  let by = b.body.position.y;
+
+  bezier(ax, ay, ax + 40, ay + 40, bx - 40, by - 40, bx, by);
+
+  // Curve from right side of B to left side of C
+  let bxr = b.body.position.x + b.w / 2;
+  let cx = c.body.position.x - c.w / 2;
+  let cy = c.body.position.y;
+
+  bezier(bxr, by, bxr + 60, by + 100, cx - 60, cy - 80, cx, cy);
+}
+
 
   drawingContext.setLineDash([]);
 }
@@ -131,9 +137,7 @@ function detectStaticLabelCollisions() {
       let lpos = label.body.position;
       let dx = abs(pos.x - lpos.x);
       let dy = abs(pos.y - lpos.y);
-      let overlapX = dx < (letter.w / 2 + label.w / 2);
-      let overlapY = dy < (letter.h / 2 + label.h / 2);
-      if (overlapX && overlapY) {
+      if (dx < (letter.w / 2 + label.w / 2) && dy < (letter.h / 2 + label.h / 2)) {
         letter.clicked();
       }
     }
@@ -142,9 +146,7 @@ function detectStaticLabelCollisions() {
 
 function mousePressed() {
   for (let l of letterBodies) {
-    if (l.isMouseOver()) {
-      l.clicked();
-    }
+    if (l.isMouseOver()) l.clicked();
   }
 }
 
@@ -155,8 +157,8 @@ class FloatingLetter {
     this.w = textWidth(letter) + 16;
     this.h = 32;
     this.body = Bodies.rectangle(x, y, this.w, this.h, {
-      restitution: 0.6,
-      friction: 0.02,
+      restitution: 0.9,
+      friction: 0.1,
       frictionAir: 0.02,
       density: 0.001
     });
@@ -172,11 +174,8 @@ class FloatingLetter {
 
   update() {
     let pos = this.body.position;
-    let mouse = createVector(mouseX, mouseY);
-    let spark = createVector(pos.x, pos.y);
-    let dir = p5.Vector.sub(mouse, spark);
-    let distToMouse = dir.mag();
-    if (distToMouse < 150) {
+    let dir = p5.Vector.sub(createVector(mouseX, mouseY), createVector(pos.x, pos.y));
+    if (dir.mag() < 150) {
       dir.normalize().mult(0.0002);
       Body.applyForce(this.body, this.body.position, { x: dir.x, y: dir.y });
     }
@@ -192,9 +191,8 @@ class FloatingLetter {
     push();
     translate(pos.x, pos.y);
     rotate(angle);
-    fill(this.color);
-    textFont('serif'); // Use serif font here
     textSize(24);
+    fill(this.color);
     text(this.letter, 0, 0);
     pop();
   }
@@ -210,9 +208,10 @@ class FloatingLetter {
   }
 
   clicked() {
-    if (this.hasChanged) return;
-    this.color = color(random(255), random(255), random(255));
-    this.hasChanged = true;
+    if (!this.hasChanged) {
+      this.color = color(random(255), random(255), random(255));
+      this.hasChanged = true;
+    }
   }
 }
 
@@ -234,9 +233,8 @@ class StaticLabel {
     push();
     translate(pos.x, pos.y);
     noStroke();
-    fill('#2E2E2E');
-    textFont('serif'); // Use serif font here
     textSize(24);
+    fill('#161616');
     textAlign(CENTER, CENTER);
     text(this.textContent, 0, 0);
     pop();
@@ -244,32 +242,26 @@ class StaticLabel {
 }
 
 function repositionStaticElements() {
-  let margin = 20;
-  let minVerticalSpacing = 100;
+  let labelCount = labels.length;
+  let verticalPadding = 180;
+  let totalHeight = height - 2 * verticalPadding;
+  let spacing = totalHeight / (labelCount - 1);
 
-  if (labels.length === 3) {
-    let usedZones = [];
+  for (let i = 0; i < labelCount; i++) {
+    let label = labels[i];
+    let word = labelWords[i];
 
-    for (let i = 0; i < labels.length; i++) {
-      let label = labels[i];
-      let word = labelWords[i];
-      let newW = textWidth(word) + 20;
-      let newH = 40;
-      label.w = newW;
-      label.h = newH;
+    let labelX = labelPositions[i].x(); // Use predefined X
+    let labelY = verticalPadding + i * spacing;
 
-      let x = constrain(labelPositions[i].x(), newW / 2 + margin, width - newW / 2 - margin);
-      let y = constrain(labelPositions[i].y(), newH / 2 + margin, height - newH / 2 - margin);
+    textSize(24);
+    let labelW = textWidth(word) + 20;
+    let labelH = 40;
 
-      for (let zone of usedZones) {
-        if (abs(y - zone.y) < minVerticalSpacing) {
-          y = zone.y + minVerticalSpacing;
-        }
-      }
+    label.w = labelW;
+    label.h = labelH;
 
-      Body.setPosition(label.body, { x, y });
-      usedZones.push({ y, h: newH });
-    }
+    Body.setPosition(label.body, { x: labelX, y: labelY });
   }
 }
 
