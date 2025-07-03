@@ -8,6 +8,12 @@ let engine, world;
 let letterBodies = [];
 let leftWall, rightWall, topWall, bottomWall;
 let labels = [];
+let introAlpha = 0;
+let introYOffset = 30;
+
+
+let introHeader = "Hi – I'm Jennifer Lee";
+let introParagraph = "A product designer who builds engaging branding and digital experiences – designed through empathy, shaped by culture, and brought to life through design thinking.";
 
 const labelWords = ["Empathy", "Experience", "Culture"];
 let labelPositions = [
@@ -37,7 +43,7 @@ function setup() {
   world = engine.world;
 
   for (let i = 0; i < labelWords.length; i++) {
-    addStaticLabel(labelPositions[i].x(), 0, labelWords[i]); // y will be updated later
+    addStaticLabel(labelPositions[i].x(), 0, labelWords[i]);
   }
 
   let thickness = 100;
@@ -58,6 +64,45 @@ function draw() {
   }
 
   clear();
+
+   // Responsive header + paragraph block
+ 
+  // Animate fade-in and slide-up
+introAlpha = lerp(introAlpha, 255, 0.05);
+introYOffset = lerp(introYOffset, 0, 0.05);
+
+let isMobile = width < 810;
+
+// Shared position values
+let introBoxWidth = isMobile ? width * 0.8 : width * 0.5;
+let introBoxX = isMobile ? (width - introBoxWidth) / 2 : 40;
+
+let headerHeight = 32 * 2;
+let paragraphHeight = 24 * 4;
+let introBoxH = headerHeight + 24 + paragraphHeight;
+
+let introBoxY = isMobile ? 40 + introYOffset
+  : (height - introBoxH) / 2 + introYOffset;
+
+// Render header + paragraph
+push();
+noStroke();
+fill(255, introAlpha);
+textAlign(isMobile ? CENTER : LEFT, TOP);
+
+// Header
+textSize(32);
+textLeading(38);
+text(introHeader, introBoxX, introBoxY, introBoxWidth);
+
+// Paragraph
+textSize(16);
+textLeading(22);
+let paragraphY = introBoxY + headerHeight + 12;
+text(introParagraph, introBoxX, paragraphY, introBoxWidth);
+pop();
+
+
   Engine.update(engine);
   detectCollisions();
   detectStaticLabelCollisions();
@@ -73,45 +118,58 @@ function draw() {
     label.display();
   }
 
-  for (let i = letterBodies.length - 1; i >= 0; i--) {
-    let l = letterBodies[i];
-    l.update();
-    if (l.isMouseOver()) {
-      l.clicked();
-    }
-    l.display();
+ for (let i = letterBodies.length - 1; i >= 0; i--) {
+  let l = letterBodies[i];
+  l.update();
+
+  if (l.isMouseOver()) {
+    l.clicked();
   }
 
-  // Bezier curves between labels
- if (labels.length >= 3) {
-  let a = labels[0];
-  let b = labels[1];
-  let c = labels[2];
+  // Check for overlap with intro box
+  let pos = l.body.position;
+  let overlapsIntro =
+    pos.x > introBoxX &&
+    pos.x < introBoxX + introBoxWidth &&
+    pos.y > introBoxY &&
+    pos.y < introBoxY + introBoxH;
 
-  stroke(180);
-  let offset = (millis() / 120) % 32;
-  drawingContext.setLineDash([5, 20]);
-  drawingContext.lineDashOffset = -offset;
-  strokeWeight(2);
-  noFill();
-
-  // Curve from right side of A to left side of B
-  let ax = a.body.position.x + a.w / 2;
-  let ay = a.body.position.y;
-
-  let bx = b.body.position.x - b.w / 2;
-  let by = b.body.position.y;
-
-  bezier(ax, ay, ax + 40, ay + 40, bx - 40, by - 40, bx, by);
-
-  // Curve from right side of B to left side of C
-  let bxr = b.body.position.x + b.w / 2;
-  let cx = c.body.position.x - c.w / 2;
-  let cy = c.body.position.y;
-
-  bezier(bxr, by, bxr + 60, by + 100, cx - 60, cy - 80, cx, cy);
+  if (overlapsIntro) {
+    drawingContext.filter = "blur(16px)";
+    l.display();
+    drawingContext.filter = "none";
+  } else {
+    l.display();
+  }
 }
 
+
+  if (labels.length >= 3) {
+    let a = labels[0];
+    let b = labels[1];
+    let c = labels[2];
+
+    stroke(180);
+    let offset = (millis() / 120) % 32;
+    drawingContext.setLineDash([5, 20]);
+    drawingContext.lineDashOffset = -offset;
+    strokeWeight(2);
+    noFill();
+
+    let ax = a.body.position.x + a.w / 2;
+    let ay = a.body.position.y;
+
+    let bx = b.body.position.x - b.w / 2;
+    let by = b.body.position.y;
+
+    bezier(ax, ay, ax + 40, ay + 40, bx - 40, by - 40, bx, by);
+
+    let bxr = b.body.position.x + b.w / 2;
+    let cx = c.body.position.x - c.w / 2;
+    let cy = c.body.position.y;
+
+    bezier(bxr, by, bxr + 60, by + 100, cx - 60, cy - 80, cx, cy);
+  }
 
   drawingContext.setLineDash([]);
 }
@@ -234,7 +292,7 @@ class StaticLabel {
     translate(pos.x, pos.y);
     noStroke();
     textSize(24);
-    fill('#161616');
+    fill('#ffffff');
     textAlign(CENTER, CENTER);
     text(this.textContent, 0, 0);
     pop();
@@ -242,6 +300,7 @@ class StaticLabel {
 }
 
 function repositionStaticElements() {
+  let isMobile = width < 810;
   let labelCount = labels.length;
   let verticalPadding = 180;
   let totalHeight = height - 2 * verticalPadding;
@@ -251,8 +310,25 @@ function repositionStaticElements() {
     let label = labels[i];
     let word = labelWords[i];
 
-    let labelX = labelPositions[i].x(); // Use predefined X
-    let labelY = verticalPadding + i * spacing;
+    let labelX, labelY;
+
+    if (isMobile) {
+      // 🟢 Mobile: vertically stacked below intro, zig-zag horizontal layout
+      // Alternate x positions: 30%, 70%, 40%, etc.
+      let zigzagPercents = [0.3, 0.7, 0.4, 0.65, 0.5]; // Add more if needed
+      labelX = width * zigzagPercents[i % zigzagPercents.length];
+
+      // Estimate header + paragraph height
+      let estimatedHeaderHeight = 42;
+      let estimatedParagraphHeight = 24 * 4;
+      let baseY = 80 + estimatedHeaderHeight + 12 + estimatedParagraphHeight + 60;
+
+      labelY = baseY + i * 80;
+    } else {
+      // 🖥️ Desktop: keep predefined x position from labelPositions
+      labelX = labelPositions[i].x();
+      labelY = verticalPadding + i * spacing;
+    }
 
     textSize(24);
     let labelW = textWidth(word) + 20;
