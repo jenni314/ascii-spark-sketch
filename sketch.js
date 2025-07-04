@@ -97,8 +97,8 @@ text(introHeader, introBoxX, introBoxY, introBoxWidth);
 
 // Paragraph
 textSize(16);
-textLeading(22);
-let paragraphY = introBoxY + headerHeight + 12;
+textLeading(28);
+let paragraphY = introBoxY + headerHeight;
 text(introParagraph, introBoxX, paragraphY, introBoxWidth);
 pop();
 
@@ -110,7 +110,7 @@ pop();
   if (frameCount % 20 === 0 && letterBodies.length < 80) {
     let x = random(100, width - 100);
     let y = random(100, height - 100);
-    let spark = random(['*', '+', 'x', '•', '.', '✦']);
+    let spark = random(['*', '✧', '⋆', '•', '.', '✦','✩']);
     letterBodies.push(new FloatingLetter(x, y, spark));
   }
 
@@ -135,7 +135,7 @@ pop();
     pos.y < introBoxY + introBoxH;
 
   if (overlapsIntro) {
-    drawingContext.filter = "blur(16px)";
+    drawingContext.filter = "blur(32px)";
     l.display();
     drawingContext.filter = "none";
   } else {
@@ -251,6 +251,8 @@ class FloatingLetter {
     rotate(angle);
     textSize(24);
     fill(this.color);
+    stroke(255, 80);
+    strokeWeight(1);
     text(this.letter, 0, 0);
     pop();
   }
